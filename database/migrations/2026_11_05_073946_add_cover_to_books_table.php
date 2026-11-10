@@ -8,17 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('loans', function (Blueprint $table) {
-            $table->unsignedBigInteger('fine')
-                ->default(0)
-                ->after('status');
+        Schema::table('books', function (Blueprint $table) {
+            $table->string('cover')->nullable();
         });
     }
 
     public function down(): void
     {
-        Schema::table('loans', function (Blueprint $table) {
-            $table->dropColumn('fine');
+        Schema::table('books', function (Blueprint $table) {
+            $table->dropColumn('cover');
         });
     }
 };

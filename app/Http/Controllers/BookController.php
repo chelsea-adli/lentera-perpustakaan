@@ -47,7 +47,7 @@ class BookController extends Controller
     }
 
     /**
-     * Menyimpan buku baru.
+     * Menyimpan buku baru beserta gambar sampul.
      */
     public function store(Request $request)
     {
@@ -55,11 +55,18 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
+
+            'publisher' => 'nullable|string|max:255',
+            'publication_year' => 'nullable|integer|min:1000|max:2100',
+            'isbn' => 'nullable|string|max:30',
+
             'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
+
             'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        // Upload gambar sampul jika dipilih.
         if ($request->hasFile('cover')) {
             $validated['cover'] = $request->file('cover')
                 ->store('covers', 'public');
@@ -93,7 +100,7 @@ class BookController extends Controller
     }
 
     /**
-     * Memperbarui data buku.
+     * Memperbarui data buku dan gambar sampul.
      */
     public function update(Request $request, Book $book)
     {
@@ -101,16 +108,26 @@ class BookController extends Controller
             'title' => 'required|string|max:255',
             'author' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
+
+            'publisher' => 'nullable|string|max:255',
+            'publication_year' => 'nullable|integer|min:1000|max:2100',
+            'isbn' => 'nullable|string|max:30',
+
             'stock' => 'required|integer|min:0',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
+
             'cover' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
+        // Jika admin mengunggah gambar baru.
         if ($request->hasFile('cover')) {
+
+            // Hapus gambar lama jika tersedia.
             if ($book->cover) {
                 Storage::disk('public')->delete($book->cover);
             }
 
+            // Simpan gambar baru.
             $validated['cover'] = $request->file('cover')
                 ->store('covers', 'public');
         }
@@ -134,6 +151,7 @@ class BookController extends Controller
                 ->with('error', 'Buku tidak bisa dihapus karena memiliki riwayat peminjaman.');
         }
 
+        // Hapus gambar sampul dari penyimpanan.
         if ($book->cover) {
             Storage::disk('public')->delete($book->cover);
         }
